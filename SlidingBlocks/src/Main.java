@@ -18,20 +18,50 @@ public class Main {
                         { 7, 5, 8 }};
         Tile blankTile = new Tile(1, 0);
         Node start = new Node(map, blankTile, solutionMap);
+        start.calculateHeuristic();
 
-        System.out.println(start.calculateHeuristic());
-
+        aStar(start);
      }
 
-//     public static void aStar() {
-//        int cost = 0;
-//        while(){
-//            if(h == 0) {
-//                break;
-//            }
-//        }
-//
-//     }
+     public static void aStar(Node start) {
+        int cost = 0;
+
+        HashSet<Node> visited = new HashSet<>();
+        PriorityQueue<Node> queue = new PriorityQueue<>(10, new Comparator<Node>() {
+            @Override
+            public int compare(Node i, Node j) {
+                return i.getFunctionSum() - j.getFunctionSum();
+            }
+        });
+
+        queue.add(start);
+
+        while(!queue.isEmpty()){
+
+            Node current = queue.poll();
+
+            visited.add(current);
+
+            if(current.getH() == 0) {
+                break;
+            }
+            ArrayList<Node> neighbours = current.nextStates();
+            for(Node neighbour: neighbours) {
+                if(visited.contains(neighbour) && current.getFunctionSum() <= neighbour.getFunctionSum()) {
+                    continue;
+                }
+                if(!visited.contains(neighbour) || current.getFunctionSum() >= neighbour.getFunctionSum()) {
+                    if(queue.contains(neighbour)) {
+                        queue.remove(neighbour);
+                    }
+
+                    queue.add(neighbour);
+                }
+            }
+
+        }
+
+     }
 
      public static HashMap<Integer, Tile> buildSolution() {
          HashMap<Integer, Tile> solutionMap = new HashMap<>();

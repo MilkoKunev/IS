@@ -3,14 +3,17 @@ import java.util.HashMap;
 
 public class Node {
     private int map[][];
-    private int h;
+    private int h = 0;
+    private int g = 0;
     private Node parent;
     private Tile blankTile;
     private static HashMap<Integer, Tile> solutionMap;
 
-    public Node(int[][]map, Tile blankTile) {
+    public Node(int[][]map, Tile blankTile, int g, Node parent) {
         this.map = map;
         this.blankTile = blankTile;
+        this.g = g;
+        this.parent = parent;
     }
 
     public Node(int[][] map, Tile blankTile, HashMap<Integer, Tile> solutionMap) {
@@ -51,9 +54,19 @@ public class Node {
         this.blankTile = blankTile;
     }
 
-    public int calculateHeuristic() {
-        int h = 0;
+    public int getG() {
+        return g;
+    }
 
+    public void setG(int g) {
+        this.g = g;
+    }
+
+    public int getFunctionSum() {
+        return h + g;
+    }
+
+    public void calculateHeuristic() {
         for(int row = 0; row < map.length; row++) {
             for(int column = 0; column < map.length; column++) {
                 int number = map[row][column];
@@ -63,12 +76,10 @@ public class Node {
                     continue;
                 }
                 if(row != solutionMapRow || column != solutionMapColumn) {
-                    h+= calculateMannhatanDistance(row, column, solutionMapRow, solutionMapColumn);
+                    this.h+= calculateMannhatanDistance(row, column, solutionMapRow, solutionMapColumn);
                 }
             }
         }
-
-        return h;
     }
 
     public int calculateMannhatanDistance(int row1, int column1, int row2, int column2) {
@@ -99,7 +110,9 @@ public class Node {
 
     public void populateArr(int row, int column, ArrayList<Node> arr) {
         int[][] newMap = this.moveBlankTile(row, column);
-        arr.add(new Node(newMap, new Tile(row, column)));
+        Node newNode = new Node(newMap, new Tile(row, column), this.g + 1, this);
+        newNode.calculateHeuristic();
+        arr.add(newNode);
     }
 
     public int[][] moveBlankTile(int row, int column) {
